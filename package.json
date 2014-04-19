@@ -1,0 +1,30 @@
+{
+  "name": "socket-message-pusher",
+  "version": "0.0.0",
+  "description": "A websocket server to be used as SAAS for push notifications from server to clients",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:bestander/socket-message-pusher.git"
+  },
+  "keywords": [
+    "socket.io",
+    "push",
+    "web sockets"
+  ],
+  "author": "Konstantin Raev",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bestander/socket-message-pusher/issues"
+  },
+  "homepage": "https://github.com/bestander/socket-message-pusher",
+  "dependencies": {
+    "socket.io": "^0.9.16",
+    "express": "^4.0.0",
+    "body-parser": "^1.0.2"
+  }
+}

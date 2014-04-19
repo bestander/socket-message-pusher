@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script>
+        var socket = io.connect('http://localhost:3000');
+        socket.on('message', function (data) {
+            var logEntry = document.createElement('p');
+            logEntry.innerText = JSON.stringify(data);
+            document.getElementsByClassName('socket-log')[0].appendChild(logEntry);
+        });
+    </script>
+</head>
+<body>
+<style>
+    .socket-log {
+        background: #add8e6;
+        border: 1px black solid;
+    }
+</style>
+<div class="socket-log">
+
+</div>
+</body>
+</html>
