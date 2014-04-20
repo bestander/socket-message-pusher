@@ -6,7 +6,7 @@ var bodyParser = require('body-parser');
 
 app.use(bodyParser());
 
-server.listen(3000);
+server.listen(80);
 
 app.post('/push', function (req, res) {
     io.sockets.emit('message',req.body);
