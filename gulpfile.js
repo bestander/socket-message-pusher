@@ -2,6 +2,7 @@ var gulp = require('gulp');
 var zip = require('gulp-zip');
 var clean = require('gulp-clean');
 var runSequence = require('run-sequence');
+var bump = require('gulp-bump');
 
 gulp.task('deploy', function (cb) {
     return runSequence(
@@ -21,3 +22,8 @@ gulp.task('clean', function () {
         pipe(clean());
 });
 
+gulp.task('bump', function(){
+    gulp.src('./package.json')
+        .pipe(bump())
+        .pipe(gulp.dest('./'));
+});

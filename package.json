@@ -1,6 +1,6 @@
 {
   "name": "socket-message-pusher",
-  "version": "0.0.0",
+  "version": "0.1.1",
   "description": "A websocket server to be used for third party web sites for push notifications to all online users",
   "main": "server.js",
   "scripts": {
@@ -33,6 +33,7 @@
     "gulp": "^3.6.2",
     "gulp-zip": "^0.3.4",
     "gulp-clean": "^0.2.4",
-    "run-sequence": "^0.3.6"
+    "run-sequence": "^0.3.6",
+    "gulp-bump": "^0.1.8"
   }
 }
