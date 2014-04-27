@@ -4,27 +4,29 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.6/angular.min.js"></script>
-    <script src="http://54.206.22.103:8080/socket.io/socket.io.js"></script>
+    <!--<script src="http://54.206.22.103:8080/socket.io/socket.io.js"></script>-->
+    <!--<script src="http://localhost:8080/socket.io/socket.io.js"></script>-->
     <link rel="stylesheet" href="assets/kube.css">
     <script>
-//        http://imperavi.com/kube/typography/
-        var host = 'http://54.206.22.103:8080';
-        //        var host = '54.206.31.186:80';
+//        var host = 'http://54.206.22.103:8080';
+        var host = 'http://127.0.0.1:8080';
         var website = 'mandrill';
         function SocketMessagesController($scope) {
-            var socket = io.connect(host);
-            socket.emit('subscribe', 'booktrack-' + website);
-
-            $scope.messages = [];
-            socket.on('message', function (data) {
-                $scope.messages.push(data);
-            });
+//            var socket = io.connect(host);
+//            socket.emit('subscribe', 'booktrack-' + website);
+//
+//            $scope.messages = [];
+//            socket.on('message', function (data) {
+//                $scope.messages.push(data);
+//            });
 
         }
 
         function QueueManagementController($scope, $http) {
             $scope.refresh = function () {
-                $http.get(host + '/queues').success(function (data) {
+                $http.get(host + '/api/queues', {
+                    withCredentials: true
+                }).success(function (data) {
                     $scope.queues = data;
                 });
             };
@@ -32,12 +34,16 @@
 
             $scope.addQueue = function (website, name) {
                 console.log("adding to queue");
-                $http.post(host + '/queue', {
+                $http.post(host + '/api/queue', {
                     name: name,
                     website: website,
                     data: Math.random() * 100
                 });
             };
+
+            $scope.loginGithub = function(){
+                window.location = host + '/auth/github';
+            }
         }
     </script>
 </head>
@@ -46,6 +52,7 @@
     <section class="unit-50 admin-area">
         <header>Admin area</header>
         <div ng-controller="QueueManagementController">
+            <button class="btn" ng-click="loginGithub()">Login with GitHub</button>
             <table>
                 <thead>
                 <tr>
