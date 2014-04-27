@@ -3,7 +3,6 @@ var zip = require('gulp-zip');
 var clean = require('gulp-clean');
 var runSequence = require('run-sequence');
 
-
 gulp.task('deploy', function (cb) {
     return runSequence(
         'clean',
