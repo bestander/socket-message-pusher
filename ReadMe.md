@@ -17,4 +17,3 @@ callback to listen for messages.
 ## Queues
 
 ### to test from command line
-curl -X POST -H "Content-Type: application/json" -d '{"sveta":"popa"}' http://54.206.31.186/push

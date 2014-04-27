@@ -1,7 +1,5 @@
-
-# Webstorm droppings
 \.idea
 
-# binary node dependencies
 /node_modules/
 
+/build/
