@@ -1,7 +1,8 @@
-
-# Webstorm droppings
 \.idea
+\.DS_Store
 
-# binary node dependencies
 /node_modules/
 
+/build/
+
+/db/
