@@ -6,6 +6,7 @@ var cors = require('cors');
 var passport = require('passport');
 var GitHubStrategy = require('passport-github').Strategy;
 var cookieParser = require('cookie-parser');
+
 var app = express();
 var server = require('http').createServer(app);
 var secureUserCookieName = 'pusher-user';
@@ -16,59 +17,63 @@ app.use(cors({
     credentials: true
 }));
 app.use(bodyParser());
-// TODO key
-app.use(cookieParser('optional secret string'));
-// verify cookie
+app.use(cookieParser());
+// ----------------- cookie authentication
 app.use('/api', function(req, res, next){
-    console.log("/api call", req.cookies, req.signedCookies)
     var user = req.cookies[secureUserCookieName];
-    console.log("got user from cookie", user)
+    if(!user){
+        res.send(401);
+        return;
+    }
     req.user = user;
     next();
 });
 
-var io = socketIo.listen(server);
+app.get('/api/profile', function(req, res) {
+    res.send(req.user);
+});
 
-db = new Datastore();
-
-console.log("starting server on ", process.env.PORT || 80);
-server.listen(process.env.PORT || 80);
+db = {};
+db.users = new Datastore({ filename: 'db/users', autoload: true });
+db.queues = new Datastore({ filename: 'db/queues', autoload: true });
 
 // ------------ sending messages
+var io = socketIo.listen(server);
 
 io.sockets.on('connection', function (socket) {
     socket.on('subscribe', function(room) {
         socket.join(room);
-        // TODO find all queues for the room and send updates
-//        socket.emit('message', data);
+        db.queues.find({room: room}, function(err, docs){
+            docs.forEach(function(doc){
+                socket.emit('message', doc.data);
+            });
+        });
     });
 });
 
-function emitMessageFromQueue(company, room, queue) {
-    // TODO get data by queue
-//    var socketRoomName = company + '.' + room;
-    // TODO get data from queue
-//    var data = {};
+function emitMessageFromQueue(room, data) {
     io.sockets.in(room).emit('message', data);
 }
 
 // -------------- managing queue
 
 app.post('/api/queue', function (req, res) {
-    // TODO authentication and company name
-    var company = 'booktrack';
     var name = req.body.name;
     var website = req.body.website;
-    db.insert({name: name, website: website, company: company, data: req.body.data});
-    // TODO process nextTick
-//    emitMessageFromQueue(company, website, name);
-    io.sockets.in(company + '-' + website).emit('message', req.body.data);
+    var room = req.user.githubId + '$' + website; // TODO is $ a good separator?
+    db.queues.insert({name: name,
+        website: website,
+        user: req.user.githubId,
+        room: room,
+        data: req.body.data});
+    process.nextTick(function(){
+        emitMessageFromQueue(room, req.body.data);
+    });
     res.send("OK");
 });
 
 app.get('/api/queues', function (req, res) {
-    console.log("/api/queues user", req.user)
-    db.find({}, function(err, docs){
+    db.queues.find({user: req.user.githubId}, function(err, docs){
         res.send(docs);
     });
 });
@@ -85,15 +90,21 @@ passport.use(new GitHubStrategy({
         clientSecret: process.env.GITHUB_CLIENT_SECRET
     },
     function(accessToken, refreshToken, profile, done) {
-//        console.log("auth done", JSON.stringify(profile));
-        done(null, {
-            github_id: profile.username,
-            displayName: profile.displayName
+        db.users.find({ githubId: profile.username }, function (err, users) {
+            if(err){
+                return done(err);
+            }
+            if(users.length === 0){
+                db.users.insert({ githubId: profile.username, displayName: profile.displayName }, function(err, doc){
+                    if(err){
+                        return done(err);
+                    }
+                    return done(null, doc);
+                })
+            } else {
+                return done(null, users[0]);
+            }
         });
-        // TODO set internal user id
-//        User.findOrCreate({ githubId: profile.id }, function (err, user) {
-//            return done(err, user);
-//        });
     }
 ));
 
@@ -105,9 +116,13 @@ app.get('/auth/github',
 app.get('/auth/github/callback',
     passport.authenticate('github', { session: false }),
     function (req, res) {
-        console.log("github callback", req.user);
-        // set a signed cookie
-        // TODO secure: true, httpOnly
+        // set session cookie that we can trust
+        // TODO for extra security we can encrypt it with jsonwebtoken
         res.cookie(secureUserCookieName, req.user, {httpOnly: true, maxAge: 1000 * 60 * 60 * 24});
         res.redirect(process.env.FRONT_END_URL);
     });
+
+
+// ----------------- start server
+console.log("starting server on ", process.env.PORT || 80);
+server.listen(process.env.PORT || 80);

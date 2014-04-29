@@ -5,20 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.6/angular.min.js"></script>
     <!--<script src="http://54.206.22.103:8080/socket.io/socket.io.js"></script>-->
-    <!--<script src="http://localhost:8080/socket.io/socket.io.js"></script>-->
+    <script src="http://localhost:8080/socket.io/socket.io.js"></script>
     <link rel="stylesheet" href="assets/kube.css">
     <script>
 //        var host = 'http://54.206.22.103:8080';
         var host = 'http://127.0.0.1:8080';
         var website = 'mandrill';
         function SocketMessagesController($scope) {
-//            var socket = io.connect(host);
-//            socket.emit('subscribe', 'booktrack-' + website);
-//
-//            $scope.messages = [];
-//            socket.on('message', function (data) {
-//                $scope.messages.push(data);
-//            });
+            var socket = io.connect(host);
+            socket.emit('subscribe', 'bestander$' + website);
+
+            $scope.messages = [];
+            socket.on('message', function (data) {
+                $scope.messages.push(data);
+                $scope.$apply();
+            });
 
         }
 
@@ -38,8 +39,16 @@
                     name: name,
                     website: website,
                     data: Math.random() * 100
+                }, {
+                    withCredentials: true
                 });
             };
+
+            $http.get(host + '/api/profile', {
+                withCredentials: true
+            }).success(function (data) {
+                $scope.user = data;
+            });
 
             $scope.loginGithub = function(){
                 window.location = host + '/auth/github';
@@ -52,7 +61,8 @@
     <section class="unit-50 admin-area">
         <header>Admin area</header>
         <div ng-controller="QueueManagementController">
-            <button class="btn" ng-click="loginGithub()">Login with GitHub</button>
+            <button ng-hide="user" class="btn" ng-click="loginGithub()">Login with GitHub</button>
+            <h2 ng-show="user" class="subheading">Welcome back, {{user.displayName}}</h2>
             <table>
                 <thead>
                 <tr>
