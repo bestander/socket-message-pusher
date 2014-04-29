@@ -1,6 +1,6 @@
 {
   "name": "socket-message-pusher",
-  "version": "0.0.0",
+  "version": "0.1.2",
   "description": "A websocket server to be used as SAAS for push notifications from server to clients",
   "main": "server.js",
   "scripts": {
