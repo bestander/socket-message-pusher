@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html ng-app class="no-js" lang="en">
+<head lang="en">
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.6/angular.min.js"></script>
+    <link rel="stylesheet" href="assets/kube.css">
+    <script>
+        var host = 'http://54.206.22.103:8080';
+
+        function QueueManagementController($scope, $http) {
+            $scope.refresh = function () {
+                $http.get(host + '/api/queues', {
+                    withCredentials: true
+                }).success(function (data) {
+                    $scope.queues = data;
+                });
+            };
+            $scope.refresh();
+            $scope.settings = {
+                myWebsite: 'www.example.com',
+                myQueue: 'outage'
+            };
+
+            $scope.addQueue = function (website, name) {
+                console.log("adding to queue");
+                $http.post(host + '/api/queue', {
+                    name: name,
+                    website: website,
+                    data: Math.random() * 100
+                }, {
+                    withCredentials: true
+                });
+            };
+
+            $http.get(host + '/api/profile', {
+                withCredentials: true
+            }).success(function (data) {
+                $scope.user = data;
+            });
+
+            $scope.loginGithub = function () {
+                window.location = host + '/auth/github';
+            }
+        }
+    </script>
+</head>
+<body>
+<nav class="navbar">
+    <ul>
+        <li><a href="/index.html">About</a></li>
+        <li class="active"><a href="/admin.html">Set up account</a></li>
+        <li><a href="/socket-test.html">Test page</a></li>
+    </ul>
+</nav>
+<section class="admin-area" ng-controller="QueueManagementController">
+    <button ng-hide="user" class="btn" ng-click="loginGithub()">Login with GitHub</button>
+    <div ng-show="user">
+        <h2 class="subheading">Welcome back, {{user.displayName}}</h2>
+        <h3 class="subheading">Your website prefix is <b>{{settings.myWebsite}}</b></h3>
+        <h3 class="subheading">Your messaging queue name is <b>{{settings.myQueue}}</b></h3>
+        <table>
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Website</th>
+                <th>Queue Name</th>
+                <th>Data</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="queue in queues">
+                <td>{{$index}}</td>
+                <td>{{queue.website}}</td>
+                <td>{{queue.name}}</td>
+                <td>{{queue.data}}</td>
+            </tr>
+            </tbody>
+        </table>
+        <button class="btn" ng-click="addQueue(settings.myWebsite, settings.myQueue)">Add new data to queue <b>{{settings.myQueue}}</b></button>
+        <button class="btn" ng-click="refresh()">Refresh</button>
+    </div>
+</section>
+</body>
+</html>

@@ -3,96 +3,17 @@
 <head lang="en">
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.6/angular.min.js"></script>
-    <script src="http://54.206.22.103:8080/socket.io/socket.io.js"></script>
     <link rel="stylesheet" href="assets/kube.css">
-    <script>
-        var host = 'http://54.206.22.103:8080';
-        var website = 'mandrill';
-        function SocketMessagesController($scope) {
-            var socket = io.connect(host);
-            socket.emit('subscribe', 'bestander$' + website);
-
-            $scope.messages = [];
-            socket.on('message', function (data) {
-                $scope.messages.push(data);
-                $scope.$apply();
-            });
-
-        }
-
-        function QueueManagementController($scope, $http) {
-            $scope.refresh = function () {
-                $http.get(host + '/api/queues', {
-                    withCredentials: true
-                }).success(function (data) {
-                    $scope.queues = data;
-                });
-            };
-            $scope.refresh();
-
-            $scope.addQueue = function (website, name) {
-                console.log("adding to queue");
-                $http.post(host + '/api/queue', {
-                    name: name,
-                    website: website,
-                    data: Math.random() * 100
-                }, {
-                    withCredentials: true
-                });
-            };
-
-            $http.get(host + '/api/profile', {
-                withCredentials: true
-            }).success(function (data) {
-                $scope.user = data;
-            });
-
-            $scope.loginGithub = function(){
-                window.location = host + '/auth/github';
-            }
-        }
-    </script>
 </head>
 <body>
-<div class="units-row">
-    <section class="unit-50 admin-area">
-        <header>Admin area</header>
-        <div ng-controller="QueueManagementController">
-            <button ng-hide="user" class="btn" ng-click="loginGithub()">Login with GitHub</button>
-            <h2 ng-show="user" class="subheading">Welcome back, {{user.displayName}}</h2>
-            <table>
-                <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Website</th>
-                    <th>Queue Name</th>
-                    <th>Data</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr ng-repeat="queue in queues">
-                    <td>{{$index}}</td>
-                    <td>{{queue.website}}</td>
-                    <td>{{queue.name}}</td>
-                    <td>{{queue.data}}</td>
-                </tr>
-                </tbody>
-            </table>
-            <button class="btn" ng-click="addQueue('mandrill', 'outage')">Add new Queue</button>
-            <button class="btn" ng-click="refresh()">Refresh</button>
-        </div>
-    </section>
-    <section class="unit-50 client-area">
-        <header>Messages</header>
-        <div ng-controller="SocketMessagesController">
-            <ul>
-                <li ng-repeat="message in messages">
-                    <button class="btn btn-green">{{message}}</button>
-                </li>
-            </ul>
-        </div>
-    </section>
-</div>
+<nav class="navbar">
+    <ul>
+        <li class="active"><a href="/index.html">About</a></li>
+        <li><a href="/admin.html">Set up account</a></li>
+        <li><a href="/socket-test.html">Test page</a></li>
+    </ul>
+</nav>
+<h1>Socket message pusher</h1>
+<p class="lead">Here I will explain what this page is doing</p>
 </body>
 </html>

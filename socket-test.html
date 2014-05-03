@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html ng-app class="no-js" lang="en">
+<head lang="en">
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.6/angular.min.js"></script>
+    <script src="http://54.206.22.103:8080/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="assets/kube.css">
+    <script>
+        var host = 'http://54.206.22.103:8080';
+        var socket = io.connect(host);
+
+        function SocketMessagesController($scope, $http) {
+
+            $scope.settings = {
+                userId: '',
+                website: 'www.example.com'
+            };
+
+            $http.get(host + '/api/profile', {
+                withCredentials: true
+            }).success(function (data) {
+                $scope.user = data;
+                $scope.settings.userId = data.githubId;
+            });
+
+            $scope.requestQueue = function(){
+                $scope.messages = [];
+                socket.emit('subscribe', $scope.settings.userId + '$' + $scope.settings.website);
+            };
+            socket.on('message', function (data) {
+                $scope.messages.push(data);
+                $scope.$apply();
+            });
+
+        }
+    </script>
+</head>
+<body>
+<section class="client-area" ng-controller="SocketMessagesController">
+    <form method="post" action="" class="forms">
+        <label>
+            Your github login <span class="req">*</span>
+            <input type="text" name="github-id" class="width-30" ng-model="settings.userId"/>
+            Your website <span class="req">*</span>
+            <input type="text" name="website-id" class="width-30" ng-model="settings.website"/>
+        </label>
+        <p>
+            <input type="submit" class="btn" value="Submit" ng-click="requestQueue()" />
+        </p>
+    </form>
+    <header>Messages</header>
+    <div>
+        <ul>
+            <li ng-repeat="message in messages">
+                <button class="btn btn-green">{{message}}</button>
+            </li>
+        </ul>
+    </div>
+</section>
+</body>
+</html>
